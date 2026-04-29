@@ -86,9 +86,11 @@ def pg_env(pg_container) -> Iterator[dict[str, str]]:
         "dbname=hospital_dashboard "
         "user=hospital_app password=apppass"
     )
+    from src.transform import _strip_psql_metacommands
+
     with psycopg.connect(app_dsn, autocommit=True) as conn, conn.cursor() as cur:
-        cur.execute(SQL_SCHEMA.read_text())
-        cur.execute(SQL_SEED.read_text())
+        cur.execute(_strip_psql_metacommands(SQL_SCHEMA.read_text()))
+        cur.execute(_strip_psql_metacommands(SQL_SEED.read_text()))
 
     env = {
         "PGHOST": pg_container.get_container_host_ip(),
